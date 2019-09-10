@@ -43,7 +43,7 @@ def IsPublic(cmd):
          return True
       return False
 
-# check if 'command' can be used by 'chat_id'
+# check if 'cmd' can be used by 'chat_id'
 def CanAnswer(cmd, chat_id):
    if IsPublic(cmd):
       return True
@@ -69,11 +69,12 @@ def Execute(cmd):
 # message handling
 def HandleTgMsg(msg):
    content_type, chat_type, chat_id = telepot.glance(msg)
+    
    #debug info
    if cfg['debug']:
       print(content_type, chat_type, chat_id)
 
-   #if the message comes from a predefined chat_id, respond and do your thing
+   #check if user has permission and eventually answer
    if (content_type == 'text'):
       if CanAnswer(msg['text'], chat_id):
          bot.sendMessage(chat_id, Execute(msg['text']))
