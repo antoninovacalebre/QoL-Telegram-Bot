@@ -35,8 +35,9 @@ def IsValidChatID(id):
 
 # validate permission
 def IsPublic(cmd):
+   true_cmd = cmd.split(' ', 1)[0]
    try:
-      cfg['public_cmds'].index(cmd)
+      cfg['public_cmds'].index(true_cmd)
       return True
    except:
       if cmd[0] != '/':
@@ -53,12 +54,19 @@ def CanAnswer(cmd, chat_id):
 
 # run commands
 def Execute(cmd):
-   if cmd == '/wol':
+   true_cmd = cmd.split(' ', 1)[0]
+   if true_cmd == '/wol':
       send_magic_packet(cfg['wol_mac'])
       return 'Sent WoL to ' + cfg['wol_mac']
-   elif cmd == '/shutdown':
+   elif true_cmd == '/shutdown':
       os.system('sudo shutdown -h now')
       return 'Bot Offline'
+   elif true_cmd == '/spongemock':
+      txt = cmd.replace('/spongemock','')
+      try:
+         return to_spongecase(txt)
+      except:
+         return 'fatal_error: StiaMO ENtRAndo daVVERo nel RIDiCOLO'
    else:
       try:
          return to_spongecase(cmd)
