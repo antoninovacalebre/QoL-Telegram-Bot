@@ -84,6 +84,13 @@ def HandleTgMsg(msg):
 
    #check if user has permission and eventually answer
    if (content_type == 'text'):
+      # split incoming text in the format
+      # /command[@bot_call] [argument]
+
+      command = 
+      
+
+
       if CanAnswer(msg['text'], chat_id):
          bot.sendMessage(chat_id, Execute(msg['text']))
 
