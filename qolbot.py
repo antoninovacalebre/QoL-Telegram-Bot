@@ -21,16 +21,16 @@ def to_spongecase(orig, cap_chance = 0.2):
    else:
       spongecase = []
       for ch in orig:
-      case_choice = random() < cap_chance
-      spongecase.append(ch.upper() if (case_choice) else ch.lower())
-      cap_chance = 1 - cap_chance
+         case_choice = random() < cap_chance
+         spongecase.append(ch.upper() if (case_choice) else ch.lower())
+         cap_chance = 1 - cap_chance
     
       return ''.join(spongecase)
 
 # CPU temp
-def GetCPUTemp()
+def GetCPUTemp():
    tmp = CPUTemperature()
-   return str(tmp.temperature) + ' \xb0C'
+   return str(tmp.temperature) + ' *C' 
 
 # validate chat_id
 def IsValidChatID(id):
@@ -72,27 +72,33 @@ def HandleTgMsg(msg):
       rx_command = msg['text']
       tmp = rx_command.split(' ', 1)   #split '/command@botname' from 'argument'
       command = tmp[0].split('@', 1)[0]
-      argument = tmp[1]
- 
+      if (rx_command[0] != '/'):
+         argument = rx_command
+      elif (len(tmp) == 1):
+         argument = '' 
+      else:
+         argument = tmp[1]
+
       #check if user has permission and eventually answer
       if CanAnswer(command, chat_id):
          # bot.sendMessage(chat_id, Execute(command, argument))
-         if cmd == '/wol':
+         if command == '/wol':
             # wake on lan
             send_magic_packet(cfg['wol_mac'])
-            bot.sendMessage ('Sent WoL to ' + cfg['wol_mac'])
-         elif cmd == '/shutdown':
+            bot.sendMessage (chat_id, 'Sent WoL to ' + cfg['wol_mac'])
+         elif command == '/shutdown':
             # shut down rpi
-            bot.sendMessage ('Bot Offline')
+            bot.sendMessage (chat_id, 'Bot Offline')
             os.system('sudo shutdown -h now')
-         elif cmd == '/cputemp'
-            bot.sendMessage('CPU temperature is ' + GetCPUTemp())
-         elif (cmd == '/spongemock' or cmd[0] != '/'):
+         elif command == '/cputemp':
+            bot.sendMessage(chat_id, 'CPU temperature is ' + GetCPUTemp())
+         elif (command == '/spongemock' or command[0] != '/'):
             # spongemock response
-            try:
-               bot.sendMessage (to_spongecase(argument))
-            except:
-               bot.sendMessage ('fatal_error: StiaMO ENtRAndo daVVERo nel RIDiCOLO')
+            if (len(argument) > 0):
+               try:
+                  bot.sendMessage (chat_id, to_spongecase(argument))
+               except:
+                  bot.sendMessage (chat_id, 'fatal_error: StiaMO ENtRAndo daVVERo nel RIDiCOLO')
          else:
             return 'Unknown command'
 
