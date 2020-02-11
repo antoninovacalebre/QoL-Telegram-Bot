@@ -4,26 +4,33 @@ import os
 import time
 import telepot
 import json
+import unidecode
 from telepot.loop import MessageLoop
-from wakeonlan import send_magic_packet
-from random import random
-from random import seed
-from pprint import pprint
+from wakeonlan    import send_magic_packet
+from gpiozero     import CPUTemperature
+from random       import random
+from random       import seed
+from pprint       import pprint
 
 # mocking spongebob ( https://github.com/dhildebr/spongebob-case )
-def to_spongecase(orig, cap_chance = 0.5):
-  orig = str(orig)
-  if len(orig) <= 1:
-    return (orig.upper() if (random() < cap_chance) else orig.lower())
-  else:
-    seed(orig)
-    
-    spongecase = []
-    for ch in orig:
+def to_spongecase(orig, cap_chance = 0.2):
+   orig = unidecode.unidecode(orig)
+
+   if len(orig) <= 1:
+      return (orig.upper() if (random() < cap_chance) else orig.lower())
+   else:
+      spongecase = []
+      for ch in orig:
       case_choice = random() < cap_chance
       spongecase.append(ch.upper() if (case_choice) else ch.lower())
+      cap_chance = 1 - cap_chance
     
-    return ''.join(spongecase)
+      return ''.join(spongecase)
+
+# CPU temp
+def GetCPUTemp()
+   tmp = CPUTemperature()
+   return str(tmp.temperature) + ' \xb0C'
 
 # validate chat_id
 def IsValidChatID(id):
@@ -35,9 +42,8 @@ def IsValidChatID(id):
 
 # validate permission
 def IsPublic(cmd):
-   true_cmd = cmd.split(' ', 1)[0]
    try:
-      cfg['public_cmds'].index(true_cmd)
+      cfg['public_cmds'].index(cmd)
       return True
    except:
       if cmd[0] != '/':
@@ -52,28 +58,6 @@ def CanAnswer(cmd, chat_id):
       return True
    return False
 
-# run commands
-def Execute(cmd):
-   true_cmd = cmd.split(' ', 1)[0]
-   if true_cmd == '/wol':
-      send_magic_packet(cfg['wol_mac'])
-      return 'Sent WoL to ' + cfg['wol_mac']
-   elif true_cmd == '/shutdown':
-      os.system('sudo shutdown -h now')
-      return 'Bot Offline'
-   elif true_cmd == '/spongemock':
-      txt = cmd.replace('/spongemock','')
-      try:
-         return to_spongecase(txt)
-      except:
-         return 'fatal_error: StiaMO ENtRAndo daVVERo nel RIDiCOLO'
-   else:
-      try:
-         return to_spongecase(cmd)
-      except:
-         return 'fatal_error: StiaMO ENtRAndo daVVERo nel RIDiCOLO'
-
-
 # message handling
 def HandleTgMsg(msg):
    content_type, chat_type, chat_id = telepot.glance(msg)
@@ -82,17 +66,35 @@ def HandleTgMsg(msg):
    if cfg['debug']:
       print(content_type, chat_type, chat_id)
 
-   #check if user has permission and eventually answer
    if (content_type == 'text'):
       # split incoming text in the format
-      # /command[@bot_call] [argument]
-
-      command = 
-      
-
-
-      if CanAnswer(msg['text'], chat_id):
-         bot.sendMessage(chat_id, Execute(msg['text']))
+      # /command[@botname] [argument]
+      rx_command = msg['text']
+      tmp = rx_command.split(' ', 1)   #split '/command@botname' from 'argument'
+      command = tmp[0].split('@', 1)[0]
+      argument = tmp[1]
+ 
+      #check if user has permission and eventually answer
+      if CanAnswer(command, chat_id):
+         # bot.sendMessage(chat_id, Execute(command, argument))
+         if cmd == '/wol':
+            # wake on lan
+            send_magic_packet(cfg['wol_mac'])
+            bot.sendMessage ('Sent WoL to ' + cfg['wol_mac'])
+         elif cmd == '/shutdown':
+            # shut down rpi
+            bot.sendMessage ('Bot Offline')
+            os.system('sudo shutdown -h now')
+         elif cmd == '/cputemp'
+            bot.sendMessage('CPU temperature is ' + GetCPUTemp())
+         elif (cmd == '/spongemock' or cmd[0] != '/'):
+            # spongemock response
+            try:
+               bot.sendMessage (to_spongecase(argument))
+            except:
+               bot.sendMessage ('fatal_error: StiaMO ENtRAndo daVVERo nel RIDiCOLO')
+         else:
+            return 'Unknown command'
 
 
 ## SETUP
@@ -109,7 +111,7 @@ with open(CONFIG_PATH) as json_file:
 # Create Bot and send notice of being online
 bot = telepot.Bot(cfg['bot_token'])
 
-for id in cfg['chat_ids']:
+for id in cfg['chat_ids_service']:
    bot.sendMessage(id, 'Bot Online')
 
 # Check if there are old messages and completely ignore them

@@ -2,6 +2,8 @@
     "bot_token": "BotTokenHere",
     "chat_ids": [
     ],
+    "chat_ids_service": [
+    ],
     "wol_mac": "ff:ff:ff:ff:ff:ff",
     "debug": false,
     "public_cmds": [
