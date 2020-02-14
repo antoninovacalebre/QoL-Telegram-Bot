@@ -12,6 +12,7 @@ from random       import random
 from random       import seed
 from pprint       import pprint
 
+
 # mocking spongebob ( https://github.com/dhildebr/spongebob-case )
 def to_spongecase(orig, cap_chance = 0.2):
    orig = unidecode.unidecode(orig)
@@ -33,9 +34,9 @@ def GetCPUTemp():
    return str(tmp.temperature) + ' *C' 
 
 # validate chat_id
-def IsValidChatID(id):
+def IsValidChatID(id, list_name):
    try:
-      cfg['chat_ids'].index(id)
+      cfg[list_name].index(id)
       return True
    except:
       return False
@@ -53,9 +54,12 @@ def IsPublic(cmd):
 # check if 'cmd' can be used by 'chat_id'
 def CanAnswer(cmd, chat_id):
    if IsPublic(cmd):
+      # if it's a public command, anyone can use it
       return True
-   elif IsValidChatID(chat_id):
+   elif IsValidChatID(chat_id, 'chat_ids'):
+      # if it's not a public command, only authorized users can use it
       return True
+
    return False
 
 # message handling
@@ -92,6 +96,8 @@ def HandleTgMsg(msg):
             os.system('sudo shutdown -h now')
          elif command == '/cputemp':
             bot.sendMessage(chat_id, 'CPU temperature is ' + GetCPUTemp())
+         elif command == '/chatid':
+            bot.sendMessage(chat_id, str(chat_id))
          elif (command == '/spongemock' or command[0] != '/'):
             # spongemock response
             if (len(argument) > 0):
