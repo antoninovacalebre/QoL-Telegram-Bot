@@ -2,12 +2,15 @@
 This Telegram Bot gives various quality of life services. They can be set to be available only to certain chat_ids,or to be public.
 
 ## Installation Instructions
-Install `telepot`
+Install python (or python3) and pip (or pip3) if you don't already have them:
+```
+sudo apt install python
+sudo apt install python-pip
+```
+Install the various pip modules
 ```
 sudo pip install telepot
-```
-and `wakeonlan`
-```
+sudo pip install unidecode
 sudo pip install wakeonlan
 ```
 Then get the files from the repo
